@@ -1,9 +1,9 @@
 # Exercise #2: URL Shortener
 
-![topic: yaml](https://img.shields.io/badge/topic-yaml-green.svg?style=flat-square)
-![topic: http-handlers](https://img.shields.io/badge/topic-http%20handlers-green.svg?style=flat-square)
-![topic: maps](https://img.shields.io/badge/topic-maps-green.svg?style=flat-square)
-![topic: middleware](https://img.shields.io/badge/topic-middleware-green.svg?style=flat-square)
+[![topic: yaml](https://img.shields.io/badge/topic-yaml-green.svg?style=flat-square)](https://github.com/search?q=topic%3Ayaml+org%3Agophercises&type=Repositories)
+[![topic: http-handlers](https://img.shields.io/badge/topic-http%20handlers-green.svg?style=flat-square)](https://github.com/search?q=topic%3Ahttp-handlers+org%3Agophercises&type=Repositories)
+[![topic: maps](https://img.shields.io/badge/topic-maps-green.svg?style=flat-square)](https://github.com/search?q=topic%3Amaps+org%3Agophercises&type=Repositories)
+[![topic: middleware](https://img.shields.io/badge/topic-middleware-green.svg?style=flat-square)](https://github.com/search?q=topic%3Amiddleware+org%3Agophercises&type=Repositories)
 
 ![video status: unreleased](https://img.shields.io/badge/video%20status-unreleased-red.svg?style=flat-square)
 ![code status: unreleased](https://img.shields.io/badge/code%20status-unreleased-red.svg?style=flat-square)
