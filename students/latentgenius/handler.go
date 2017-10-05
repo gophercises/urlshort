@@ -1,7 +1,9 @@
-package urlshort
+package latentgenius
 
 import (
 	"net/http"
+
+	yaml "gopkg.in/yaml.v2"
 )
 
 // MapHandler will return an http.HandlerFunc (which also
@@ -11,8 +13,14 @@ import (
 // If the path is not provided in the map, then the fallback
 // http.Handler will be called instead.
 func MapHandler(pathsToUrls map[string]string, fallback http.Handler) http.HandlerFunc {
-	//	TODO: Implement this...
-	return nil
+	return func(w http.ResponseWriter, r *http.Request) {
+		path, ok := pathsToUrls[r.URL.Path]
+		if ok {
+			http.Redirect(w, r, path, http.StatusFound)
+		} else {
+			fallback.ServeHTTP(w, r)
+		}
+	}
 }
 
 // YAMLHandler will parse the provided YAML and then return
@@ -32,6 +40,25 @@ func MapHandler(pathsToUrls map[string]string, fallback http.Handler) http.Handl
 // See MapHandler to create a similar http.HandlerFunc via
 // a mapping of paths to urls.
 func YAMLHandler(yml []byte, fallback http.Handler) (http.HandlerFunc, error) {
-	// TODO: Implement this...
-	return nil, nil
+	dst := []map[string]string{}
+	if err := yaml.Unmarshal(yml, &dst); err != nil {
+		return nil, err
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		path, ok := pathSeen(r.URL.Path, &dst)
+		if ok {
+			http.Redirect(w, r, path, http.StatusFound)
+		} else {
+			fallback.ServeHTTP(w, r)
+		}
+	}, nil
+}
+
+func pathSeen(path string, pathMapSlc *[]map[string]string) (string, bool) {
+	for _, entry := range *pathMapSlc {
+		if entry["path"] == path {
+			return entry["url"], true
+		}
+	}
+	return "", false
 }
