@@ -3,7 +3,7 @@ package latentgenius
 import (
 	"net/http"
 
-	yaml "gopkg.in/yaml.v2"
+	yamlV2 "gopkg.in/yaml.v2"
 )
 
 // MapHandler will return an http.HandlerFunc (which also
@@ -39,26 +39,25 @@ func MapHandler(pathsToUrls map[string]string, fallback http.Handler) http.Handl
 //
 // See MapHandler to create a similar http.HandlerFunc via
 // a mapping of paths to urls.
-func YAMLHandler(yml []byte, fallback http.Handler) (http.HandlerFunc, error) {
-	dst := []map[string]string{}
-	if err := yaml.Unmarshal(yml, &dst); err != nil {
+func YAMLHandler(yaml []byte, fallback http.Handler) (http.HandlerFunc, error) {
+	parsedYaml, err := parseYAML(yaml)
+	if err != nil {
 		return nil, err
 	}
-	return func(w http.ResponseWriter, r *http.Request) {
-		path, ok := pathSeen(r.URL.Path, &dst)
-		if ok {
-			http.Redirect(w, r, path, http.StatusFound)
-		} else {
-			fallback.ServeHTTP(w, r)
-		}
-	}, nil
+	pathMap := buildMap(parsedYaml)
+	return MapHandler(pathMap, fallback), nil
 }
 
-func pathSeen(path string, pathMapSlc *[]map[string]string) (string, bool) {
-	for _, entry := range *pathMapSlc {
-		if entry["path"] == path {
-			return entry["url"], true
-		}
+func parseYAML(yaml []byte) (dst []map[string]string, err error) {
+	err = yamlV2.Unmarshal(yaml, &dst)
+	return dst, err
+}
+
+func buildMap(parsedYaml []map[string]string) map[string]string {
+	mergedMap := make(map[string]string)
+	for _, entry := range parsedYaml {
+		key := entry["path"]
+		mergedMap[key] = entry["url"]
 	}
-	return "", false
+	return mergedMap
 }
