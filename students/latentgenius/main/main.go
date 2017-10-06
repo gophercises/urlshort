@@ -12,10 +12,12 @@ import (
 
 var (
 	yamlPath string
+	jsonPath string
 )
 
 func init() {
 	flag.StringVar(&yamlPath, "yaml", "", "path to yaml file")
+	flag.StringVar(&jsonPath, "json", "", "path to json file")
 	flag.Parse()
 }
 
@@ -41,6 +43,19 @@ func main() {
 		}
 		fmt.Println("Starting the server on :8080")
 		http.ListenAndServe(":8080", yamlHandler)
+	} else if jsonPath != "" {
+		jsonData, err := ioutil.ReadFile(jsonPath)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		// Build the JSONHandler using the mapHandler as the
+		// fallback
+		jsonHandler, err := latentgenius.JSONHandler(jsonData, mapHandler)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("Starting the server on :8080")
+		http.ListenAndServe(":8080", jsonHandler)
 	}
 }
 

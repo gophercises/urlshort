@@ -1,6 +1,7 @@
 package latentgenius
 
 import (
+	"encoding/json"
 	"net/http"
 
 	yamlV2 "gopkg.in/yaml.v2"
@@ -48,11 +49,44 @@ func YAMLHandler(yaml []byte, fallback http.Handler) (http.HandlerFunc, error) {
 	return MapHandler(pathMap, fallback), nil
 }
 
-func parseYAML(yaml []byte) (dst []map[string]string, err error) {
-	err = yamlV2.Unmarshal(yaml, &dst)
-	return dst, err
+// JSONHandler will parse the provided JSON and then return
+// an http.HandlerFunc (which also implements http.Handler)
+// that will attempt to map any paths to their corresponding
+// URL. If the path is not provided in the JSON, then the
+// fallback http.Handler will be called instead.
+//
+// JSON is expected to be in the format:
+//
+//		{
+//			"/some-path":"https://www.some-url.com/demo"
+//		}
+//
+// The only errors that can be returned all related to having
+// invalid JSON data.
+//
+// See MapHandler to create a similar http.HandlerFunc via
+// a mapping of paths to urls.
+func JSONHandler(jsonData []byte, fallback http.Handler) (http.HandlerFunc, error) {
+	parsedJSON, err := parseJSON(jsonData)
+	if err != nil {
+		return nil, err
+	}
+	return MapHandler(parsedJSON, fallback), nil
 }
 
+func parseYAML(yaml []byte) (dst []map[string]string, err error) {
+	if err = yamlV2.Unmarshal(yaml, &dst); err != nil {
+		return nil, err
+	}
+	return dst, nil
+}
+
+func parseJSON(jsonData []byte) (dst map[string]string, err error) {
+	if err = json.Unmarshal(jsonData, &dst); err != nil {
+		return nil, err
+	}
+	return dst, nil
+}
 func buildMap(parsedYaml []map[string]string) map[string]string {
 	mergedMap := make(map[string]string)
 	for _, entry := range parsedYaml {
