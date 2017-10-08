@@ -1,8 +1,12 @@
-package latentgenius
+package handlers
 
 import (
 	"encoding/json"
+	"fmt"
+	"log"
 	"net/http"
+
+	"github.com/jinzhu/gorm"
 
 	yamlV2 "gopkg.in/yaml.v2"
 )
@@ -74,6 +78,35 @@ func JSONHandler(jsonData []byte, fallback http.Handler) (http.HandlerFunc, erro
 	return MapHandler(parsedJSON, fallback), nil
 }
 
+// DBHandler will return an http.HandlerFunc that queries the database for the
+// request URL and redirects as necessary
+func DBHandler(db *gorm.DB, fallback http.Handler) (http.HandlerFunc, error) {
+	type urlmap struct {
+		Shortpath string `gorm:"not null;unique_index"`
+		URL       string `gorm:"not null"`
+	}
+	if err := db.AutoMigrate(&urlmap{}).Error; err != nil {
+		log.Println("Gorm error: ", err)
+	}
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		urlMap := urlmap{
+			Shortpath: r.URL.Path,
+		}
+		var dst urlmap
+		err := db.Where(urlMap).First(&dst).Error
+		if err != nil {
+			if err == gorm.ErrRecordNotFound {
+				fallback.ServeHTTP(w, r)
+			} else {
+				fmt.Fprintf(w, "Unexpected error: %s", err)
+			}
+			return
+		}
+		http.Redirect(w, r, dst.URL, http.StatusMovedPermanently)
+
+	}, nil
+}
 func parseYAML(yaml []byte) (dst []map[string]string, err error) {
 	if err = yamlV2.Unmarshal(yaml, &dst); err != nil {
 		return nil, err
