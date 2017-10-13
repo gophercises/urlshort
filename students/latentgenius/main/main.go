@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/gophercises/urlshort"
+	"github.com/gophercises/urlshort/students/latentgenius"
 )
 
 func main() {
@@ -15,7 +15,7 @@ func main() {
 		"/urlshort-godoc": "https://godoc.org/github.com/gophercises/urlshort",
 		"/yaml-godoc":     "https://godoc.org/gopkg.in/yaml.v2",
 	}
-	mapHandler := urlshort.MapHandler(pathsToUrls, mux)
+	mapHandler := latentgenius.MapHandler(pathsToUrls, mux)
 
 	// Build the YAMLHandler using the mapHandler as the
 	// fallback
@@ -23,9 +23,9 @@ func main() {
 - path: /urlshort
   url: https://github.com/gophercises/urlshort
 - path: /urlshort-final
-  url: https://github.com/gophercises/urlshort/tree/solution
+  url: https://github.com/gophercises/urlshort/tree/final
 `
-	yamlHandler, err := urlshort.YAMLHandler([]byte(yaml), mapHandler)
+	yamlHandler, err := latentgenius.YAMLHandler([]byte(yaml), mapHandler)
 	if err != nil {
 		panic(err)
 	}
