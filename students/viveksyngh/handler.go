@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 
 	"gopkg.in/yaml.v2"
+	"github.com/boltdb/bolt"
 )
 
 // MapHandler will return an http.HandlerFunc (which also
@@ -85,4 +86,23 @@ func JSONHandler(jsonBlob []byte, fallback http.Handler) (http.HandlerFunc, erro
 	pathToUrls := buildMap(parsedJson)
 	fmt.Printf("%v\n", pathToUrls)
 	return MapHandler(pathToUrls, fallback), nil
+}
+
+func DBHandler(db *bolt.DB, fallback http.Handler)(http.HandlerFunc, error) {
+	
+	return func(w http.ResponseWriter, r *http.Request) {
+		var url []byte
+
+		db.View(func(tx *bolt.Tx) error {
+			bucket := tx.Bucket([]byte("urlshort"))
+			url = bucket.Get([]byte(r.URL.Path))
+			return nil
+		})
+
+		if url != nil {
+			http.Redirect(w, r, string(url), 302) 
+			return 
+		}
+	fallback.ServeHTTP(w, r)
+	}, nil
 }
