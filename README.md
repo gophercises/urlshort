@@ -1,12 +1,7 @@
 # Exercise #2: URL Shortener
 
-[![topic: yaml](https://img.shields.io/badge/topic-yaml-green.svg?style=flat-square)](https://github.com/search?q=topic%3Ayaml+org%3Agophercises&type=Repositories)
-[![topic: http-handlers](https://img.shields.io/badge/topic-http%20handlers-green.svg?style=flat-square)](https://github.com/search?q=topic%3Ahttp-handlers+org%3Agophercises&type=Repositories)
-[![topic: maps](https://img.shields.io/badge/topic-maps-green.svg?style=flat-square)](https://github.com/search?q=topic%3Amaps+org%3Agophercises&type=Repositories)
-[![topic: middleware](https://img.shields.io/badge/topic-middleware-green.svg?style=flat-square)](https://github.com/search?q=topic%3Amiddleware+org%3Agophercises&type=Repositories)
+[![exercise status: released](https://img.shields.io/badge/exercise%20status-released-green.svg?style=flat-square)](https://gophercises.com/exercises/urlshort)
 
-![video status: unreleased](https://img.shields.io/badge/video%20status-unreleased-red.svg?style=flat-square)
-![code status: unreleased](https://img.shields.io/badge/code%20status-unreleased-red.svg?style=flat-square)
 
 ## Exercise details
 
@@ -43,4 +38,3 @@ As a bonus exercises you can also...
 1. Update the [main/main.go](main/main.go) source file to accept a YAML file as a flag and then load the YAML from a file rather than from a string.
 2. Build a JSONHandler that serves the same purpose, but reads from JSON data.
 3. Build a Handler that doesn't read from a map but instead reads from a database. Whether you use BoltDB, SQL, or something else is entirely up to you.0
-
