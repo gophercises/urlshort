@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gophercises/urlshort/students/latentgenius/handlers"
+	"github.com/gophercises/urlshort/students/barisere/handlers"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
