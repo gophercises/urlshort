@@ -1,6 +1,7 @@
 package urlshort
 
 import (
+	"encoding/json"
 	"net/http"
 
 	yaml "gopkg.in/yaml.v2"
@@ -57,6 +58,21 @@ func MapHandler(pathsToUrls map[string]string, fallback *http.ServeMux) *http.Se
 func YAMLHandler(yml []byte, fallback *http.ServeMux) (*http.ServeMux, error) {
 	var list []mapItem
 	err := yaml.Unmarshal(yml, &list)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, item := range list {
+		globalMap.paths[item.Path] = item.Url
+		fallback.HandleFunc(item.Path, globalMap.redirect)
+	}
+
+	return fallback, nil
+}
+
+func JSONHandler(jsn []byte, fallback *http.ServeMux) (*http.ServeMux, error) {
+	var list []mapItem
+	err := json.Unmarshal(jsn, &list)
 	if err != nil {
 		return nil, err
 	}

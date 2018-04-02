@@ -11,6 +11,7 @@ import (
 
 func main() {
 	ymlpath := flag.String("ymlpath", "../storage/map.yml", "Path to a YAML file containing shortened URLs")
+	jsonpath := flag.String("jsonpath", "../storage/map.json", "Path to a JSON file containing shortened URLs")
 	flag.Parse()
 
 	mux := defaultMux()
@@ -33,8 +34,21 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	json, err := ioutil.ReadFile(*jsonpath)
+	if err != nil {
+		panic(err)
+	}
+
+	// Build the JSONHandler using the mapHandler as the
+	// fallback
+	jsonHandler, err := urlshort.JSONHandler([]byte(json), yamlHandler)
+	if err != nil {
+		panic(err)
+	}
+
 	fmt.Println("Starting the server on :8080")
-	http.ListenAndServe(":8080", yamlHandler)
+	http.ListenAndServe(":8080", jsonHandler)
 }
 
 func defaultMux() *http.ServeMux {
