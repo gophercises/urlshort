@@ -1,9 +1,18 @@
 package urlshort
 
-import "net/http"
+import (
+	"net/http"
+
+	yaml "gopkg.in/yaml.v2"
+)
 
 type urlMap struct {
 	paths map[string]string
+}
+
+type mapItem struct {
+	Path string
+	Url  string
 }
 
 var globalMap *urlMap = &urlMap{make(map[string]string)}
@@ -46,6 +55,16 @@ func MapHandler(pathsToUrls map[string]string, fallback *http.ServeMux) *http.Se
 // See MapHandler to create a similar http.HandlerFunc via
 // a mapping of paths to urls.
 func YAMLHandler(yml []byte, fallback *http.ServeMux) (*http.ServeMux, error) {
-	// TODO: Implement this...
+	var list []mapItem
+	err := yaml.Unmarshal(yml, &list)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, item := range list {
+		globalMap.paths[item.Path] = item.Url
+		fallback.HandleFunc(item.Path, globalMap.redirect)
+	}
+
 	return fallback, nil
 }
