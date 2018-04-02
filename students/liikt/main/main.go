@@ -21,34 +21,27 @@ func main() {
 		"/urlshort-godoc": "https://godoc.org/github.com/gophercises/urlshort",
 		"/yaml-godoc":     "https://godoc.org/gopkg.in/yaml.v2",
 	}
-	mapHandler := urlshort.MapHandler(pathsToUrls, mux)
+	urlshort.MapHandler(pathsToUrls, mux)
 
-	yaml, err := ioutil.ReadFile(*ymlpath)
-	if err != nil {
-		panic(err)
+	if yaml, err := ioutil.ReadFile(*ymlpath); err == nil {
+		err = urlshort.YAMLHandler([]byte(yaml), mux)
+		if err != nil {
+			panic(err)
+		}
 	}
 
-	// Build the YAMLHandler using the mapHandler as the
-	// fallback
-	yamlHandler, err := urlshort.YAMLHandler([]byte(yaml), mapHandler)
-	if err != nil {
-		panic(err)
-	}
-
-	json, err := ioutil.ReadFile(*jsonpath)
-	if err != nil {
-		panic(err)
+	if json, err := ioutil.ReadFile(*jsonpath); err == nil {
+		err = urlshort.JSONHandler([]byte(json), mux)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	// Build the JSONHandler using the mapHandler as the
 	// fallback
-	jsonHandler, err := urlshort.JSONHandler([]byte(json), yamlHandler)
-	if err != nil {
-		panic(err)
-	}
 
 	fmt.Println("Starting the server on :8080")
-	http.ListenAndServe(":8080", jsonHandler)
+	http.ListenAndServe(":8080", mux)
 }
 
 func defaultMux() *http.ServeMux {
