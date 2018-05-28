@@ -1,6 +1,7 @@
 # Exercise #2: URL Shortener
 
-[![exercise status: released](https://img.shields.io/badge/exercise%20status-released-green.svg?style=for-the-badge)](https://gophercises.com/exercises/urlshort) <!--[![demo: ->](https://img.shields.io/badge/demo-%E2%86%92-yellow.svg?style=for-the-badge)](https://gophercises.com/demos/cyoa/)-->
+[![exercise status: released](https://img.shields.io/badge/exercise%20status-released-green.svg?style=for-the-badge)](https://gophercises.com/exercises/urlshort)
+
 
 
 ## Exercise details
@@ -9,7 +10,7 @@ The goal of this exercise is to create an [http.Handler](https://golang.org/pkg/
 
 For instance, if we have a redirect setup for `/dogs` to `https://www.somesite.com/a-story-about-dogs` we would look for any incoming web requests with the path `/dogs` and redirect them.
 
-To complete this exercises you will need to implement the stubbed out methods in [handler.go](handler.go). There are a good bit of comments explaining what each method should do, and there is also a [main/main.go](main/main.go) source file that uses the package to help you test your code and get an idea of what your program should be doing.
+To complete this exercises you will need to implement the stubbed out methods in [handler.go](https://github.com/gophercises/urlshort/blob/master/handler.go). There are a good bit of comments explaining what each method should do, and there is also a [main/main.go](https://github.com/gophercises/urlshort/blob/master/main/main.go) source file that uses the package to help you test your code and get an idea of what your program should be doing.
 
 I suggest first commenting out all of the code in main.go related to the `YAMLHandler` function and focusing on implementing the `MapHandler` function first.
 
@@ -35,6 +36,6 @@ But in order for this to work you will need to create functions like `parseYAML`
 
 As a bonus exercises you can also...
 
-1. Update the [main/main.go](main/main.go) source file to accept a YAML file as a flag and then load the YAML from a file rather than from a string.
+1. Update the [main/main.go](https://github.com/gophercises/urlshort/blob/master/main/main.go) source file to accept a YAML file as a flag and then load the YAML from a file rather than from a string.
 2. Build a JSONHandler that serves the same purpose, but reads from JSON data.
 3. Build a Handler that doesn't read from a map but instead reads from a database. Whether you use BoltDB, SQL, or something else is entirely up to you.0
