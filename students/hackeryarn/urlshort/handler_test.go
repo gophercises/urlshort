@@ -1,6 +1,7 @@
 package urlshort
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -81,12 +82,14 @@ func runYAMLHandler(yaml, path string) *http.Response {
 }
 
 func createYAMLHandler(yaml string) http.HandlerFunc {
+	yamlReader := bytes.NewBufferString(yaml)
 	fallbackHandler := http.HandlerFunc(fallback)
-	handler, err := YAMLHandler([]byte(yaml), fallbackHandler)
+
+	handler, err := YAMLHandler(yamlReader, fallbackHandler)
 	if err != nil {
+		fmt.Println(err)
 		panic("could not create a YAML handler")
 	}
-
 	return handler
 }
 
