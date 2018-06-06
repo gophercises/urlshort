@@ -1,6 +1,7 @@
 package urlshort
 
 import (
+	"encoding/json"
 	"io"
 	"net/http"
 
@@ -42,7 +43,31 @@ func MapHandler(pathsToUrls map[string]string, fallback http.Handler) http.Handl
 // a mapping of paths to urls.
 func YAMLHandler(r io.Reader, fallback http.Handler) (http.HandlerFunc, error) {
 	decoder := yaml.NewDecoder(r)
-	pathURLs, err := decodeYaml(decoder)
+	pathURLs, err := decode(decoder)
+	if err != nil {
+		return nil, err
+	}
+	pathToUrls := buildMap(pathURLs)
+
+	mapHandler := MapHandler(pathToUrls, fallback)
+	return mapHandler, nil
+}
+
+// JSONHandler will parse the provided JSON and then return
+// an http.HandlerFunc that will attempt to map any paths to their
+// corresponding URL. If the path is not provided in the JSON, then the
+// fallback http.Handler will be called instead.
+//
+// JSON is expected to be in the format:
+// [
+//    {
+//      "path": "/some-path",
+//      "url": "https://www.some-url.com/demo"
+//    }
+// ]
+func JSONHandler(r io.Reader, fallback http.Handler) (http.HandlerFunc, error) {
+	decoder := json.NewDecoder(r)
+	pathURLs, err := decode(decoder)
 	if err != nil {
 		return nil, err
 	}
@@ -53,14 +78,18 @@ func YAMLHandler(r io.Reader, fallback http.Handler) (http.HandlerFunc, error) {
 }
 
 type pathURL struct {
-	Path string `yaml:"path"`
-	URL  string `yaml:"url"`
+	Path string `yaml:"path" json:"path"`
+	URL  string `yaml:"url" json:"url"`
 }
 
-func decodeYaml(decoder *yaml.Decoder) ([]pathURL, error) {
+type decoder interface {
+	Decode(v interface{}) error
+}
+
+func decode(d decoder) ([]pathURL, error) {
 	var pu []pathURL
 	for {
-		err := decoder.Decode(&pu)
+		err := d.Decode(&pu)
 		if err == io.EOF {
 			return pu, nil
 		} else if err != nil {

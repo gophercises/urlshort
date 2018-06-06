@@ -3,6 +3,7 @@ package urlshort
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -43,13 +44,35 @@ func TestYAMLHandler(t *testing.T) {
   `, path, dest)
 
 	t.Run("it uses the fallback for unknown routes", func(t *testing.T) {
-		result := runYAMLHandler(yaml, "/unknown")
+		result := runReaderHandler(YAMLHandler, yaml, "/unknown")
 
 		assertBody(t, result, fallbackResponse)
 	})
 
 	t.Run("it redirects for found url", func(t *testing.T) {
-		result := runYAMLHandler(yaml, path)
+		result := runReaderHandler(YAMLHandler, yaml, path)
+
+		assertStatus(t, result, http.StatusFound)
+		assertURL(t, result, dest)
+	})
+}
+
+func TestJSONHandler(t *testing.T) {
+	json := fmt.Sprintf(`[ 
+	{
+		"path": "%s",
+		"url": "%s"
+	}
+]`, path, dest)
+
+	t.Run("it uses the fallback for unknown routes", func(t *testing.T) {
+		result := runReaderHandler(JSONHandler, json, "/unknown")
+
+		assertBody(t, result, fallbackResponse)
+	})
+
+	t.Run("it redirects for found url", func(t *testing.T) {
+		result := runReaderHandler(JSONHandler, json, path)
 
 		assertStatus(t, result, http.StatusFound)
 		assertURL(t, result, dest)
@@ -71,26 +94,29 @@ func createMapHandler(pathToUrls map[string]string) http.HandlerFunc {
 	return MapHandler(pathToUrls, fallbackHandler)
 }
 
-func runYAMLHandler(yaml, path string) *http.Response {
+type handlerFunc func(io.Reader, http.Handler) (http.HandlerFunc, error)
+
+func runReaderHandler(handler handlerFunc, body, path string) *http.Response {
 	request, _ := http.NewRequest(http.MethodGet, path, nil)
 	response := httptest.NewRecorder()
 
-	yamlHandler := createYAMLHandler(yaml)
-	yamlHandler(response, request)
+	handlerF := createReaderHandler(handler, body)
+	handlerF(response, request)
 
 	return response.Result()
 }
 
-func createYAMLHandler(yaml string) http.HandlerFunc {
+func createReaderHandler(handler handlerFunc, yaml string) http.HandlerFunc {
 	yamlReader := bytes.NewBufferString(yaml)
 	fallbackHandler := http.HandlerFunc(fallback)
 
-	handler, err := YAMLHandler(yamlReader, fallbackHandler)
+	handlerF, err := handler(yamlReader, fallbackHandler)
 	if err != nil {
 		fmt.Println(err)
-		panic("could not create a YAML handler")
+		panic("could not create a Reader handler")
 	}
-	return handler
+
+	return handlerF
 }
 
 func assertStatus(t *testing.T, resp *http.Response, want int) {
