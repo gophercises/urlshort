@@ -10,12 +10,19 @@ import (
 )
 
 const (
-	// YamlFlag is used to set a file for the questions
-	YamlFlag = "yaml"
-	// YamlFlagValue is the value used when no YamlFlag is provided
-	YamlFlagValue = "urls.yaml"
-	// YamlFlagUsage is the help string for the YamlFlag
-	YamlFlagUsage = "URLs file in yaml format"
+	// YAMLFlag is used to set urls for yaml
+	YAMLFlag = "yaml"
+	// YAMLFlagValue is the value used when no YAMLFlag is provided
+	YAMLFlagValue = "urls.yaml"
+	// YAMLFlagUsage is the help string for the YAMLFlag
+	YAMLFlagUsage = "URLs file in yaml format"
+
+	// JSONFlag is used to set a file for the questions
+	JSONFlag = "json"
+	// JSONFlagValue is the value used when no JSONFlag is provided
+	JSONFlagValue = "urls.json"
+	// JSONFlagUsage is the help string for the JSONFlag
+	JSONFlagUsage = "URLs file in json format"
 )
 
 // Flagger is an interface for configuring various flags
@@ -30,10 +37,12 @@ func (uf *urlshortFlagger) StringVar(p *string, name, value, usage string) {
 }
 
 var yaml string
+var json string
 
 // ConfigFlags will configure the flags used by the application
 func ConfigFlags(flagger Flagger) {
-	flagger.StringVar(&yaml, YamlFlag, YamlFlagValue, YamlFlagUsage)
+	flagger.StringVar(&yaml, YAMLFlag, YAMLFlagValue, YAMLFlagUsage)
+	flagger.StringVar(&json, JSONFlag, JSONFlagValue, JSONFlagUsage)
 }
 
 func main() {
@@ -48,19 +57,31 @@ func main() {
 		"/yaml-godoc":     "https://godoc.org/gopkg.in/yaml.v2",
 	}
 	mapHandler := urlshort.MapHandler(pathsToUrls, mux)
+
 	// Build the YAMLHandler using the mapHandler as the
 	// fallback
 	yamlFile, err := os.Open(yaml)
 	if err != nil {
 		panic(err)
 	}
-
 	yamlHandler, err := urlshort.YAMLHandler(yamlFile, mapHandler)
 	if err != nil {
 		panic(err)
 	}
+
+	// Builds the JSONHandler using the YAMLHandler as the
+	// fallback
+	jsonFile, err := os.Open(json)
+	if err != nil {
+		panic(err)
+	}
+	jsonHandler, err := urlshort.JSONHandler(jsonFile, yamlHandler)
+	if err != nil {
+		panic(err)
+	}
+
 	fmt.Println("Starting the server on :8080")
-	http.ListenAndServe(":8080", yamlHandler)
+	http.ListenAndServe(":8080", jsonHandler)
 }
 
 func defaultMux() *http.ServeMux {

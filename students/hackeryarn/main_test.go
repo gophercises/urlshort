@@ -24,7 +24,7 @@ func TestConfigFlags(t *testing.T) {
 
 	ConfigFlags(flagger)
 
-	if flagger.stringVarCalls != 1 {
+	if flagger.stringVarCalls != 2 {
 		t.Error("it should set string vars")
 	}
 
@@ -34,9 +34,9 @@ func TestConfigFlags(t *testing.T) {
 func assertFlags(t *testing.T, flagger *flaggerMock) {
 	t.Helper()
 
-	expectedNames := []string{YamlFlag}
-	expectedUsages := []string{YamlFlagUsage}
-	expectedStringValues := []string{YamlFlagValue}
+	expectedNames := []string{YAMLFlag, JSONFlag}
+	expectedUsages := []string{YAMLFlagUsage, JSONFlagUsage}
+	expectedStringValues := []string{YAMLFlagValue, JSONFlagValue}
 
 	if !reflect.DeepEqual(expectedNames, flagger.varNames) {
 		t.Errorf("it should setup flag names to be %v, got %v",
