@@ -49,39 +49,23 @@ func main() {
 	flagger := &urlshortFlagger{}
 	ConfigFlags(flagger)
 
-	mux := defaultMux()
-
-	// Build the MapHandler using the mux as the fallback
-	pathsToUrls := map[string]string{
-		"/urlshort-godoc": "https://godoc.org/github.com/gophercises/urlshort",
-		"/yaml-godoc":     "https://godoc.org/gopkg.in/yaml.v2",
-	}
-	mapHandler := urlshort.MapHandler(pathsToUrls, mux)
-
-	// Build the YAMLHandler using the mapHandler as the
-	// fallback
-	yamlFile, err := os.Open(yaml)
-	if err != nil {
-		panic(err)
-	}
-	yamlHandler, err := urlshort.YAMLHandler(yamlFile, mapHandler)
-	if err != nil {
-		panic(err)
-	}
-
-	// Builds the JSONHandler using the YAMLHandler as the
-	// fallback
-	jsonFile, err := os.Open(json)
-	if err != nil {
-		panic(err)
-	}
-	jsonHandler, err := urlshort.JSONHandler(jsonFile, yamlHandler)
-	if err != nil {
-		panic(err)
-	}
+	mapHandler := createMapHandler()
+	yamlHandler := createYAMLHandler(mapHandler)
+	jsonHandler := createJSONHandler(yamlHandler)
 
 	fmt.Println("Starting the server on :8080")
 	http.ListenAndServe(":8080", jsonHandler)
+}
+
+// Build the MapHandler using the mux as the fallback
+var pathsToUrls = map[string]string{
+	"/urlshort-godoc": "https://godoc.org/github.com/gophercises/urlshort",
+	"/yaml-godoc":     "https://godoc.org/gopkg.in/yaml.v2",
+}
+
+func createMapHandler() http.HandlerFunc {
+	mux := defaultMux()
+	return urlshort.MapHandler(pathsToUrls, mux)
 }
 
 func defaultMux() *http.ServeMux {
@@ -92,4 +76,32 @@ func defaultMux() *http.ServeMux {
 
 func hello(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Hello, world!")
+}
+
+func createYAMLHandler(fallback http.HandlerFunc) http.HandlerFunc {
+	yamlFile, err := os.Open(yaml)
+	if err != nil {
+		panic(err)
+	}
+
+	yamlHandler, err := urlshort.YAMLHandler(yamlFile, fallback)
+	if err != nil {
+		panic(err)
+	}
+
+	return yamlHandler
+}
+
+func createJSONHandler(fallback http.HandlerFunc) http.HandlerFunc {
+	jsonFile, err := os.Open(json)
+	if err != nil {
+		panic(err)
+	}
+
+	jsonHandler, err := urlshort.JSONHandler(jsonFile, fallback)
+	if err != nil {
+		panic(err)
+	}
+
+	return jsonHandler
 }
