@@ -90,10 +90,7 @@ func parseJSON(jsonData []byte) (pathsToURLs []pathToURL, err error) {
 //	   ]
 //
 // The only errors that can be returned all related to having
-// invalid YAML data.
-//
-// See MapHandler to create a similar http.HandlerFunc via
-// a mapping of paths to urls.
+// invalid JSON data.
 func JSONHandler(jsonData []byte, fallback http.Handler) (jsonHandler http.HandlerFunc, err error) {
 	parsedJSON, err := parseJSON(jsonData)
 	if err != nil {
@@ -104,6 +101,11 @@ func JSONHandler(jsonData []byte, fallback http.Handler) (jsonHandler http.Handl
 	return
 }
 
+// DBHandler will use the provided Bolt database and then return
+// an http.HandlerFunc (which also implements http.Handler)
+// that will attempt to map any paths to their corresponding
+// URL. If the path is not provided in the DB, then the
+// fallback http.Handler will be called instead.
 func DBHandler(db *bolt.DB, fallback http.Handler) http.HandlerFunc {
 	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 		var url string
