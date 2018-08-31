@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	//imported my local package
-	"../students/emrekp"
+	"github.com/gophercises/urlshort"
 )
 
 func main() {
