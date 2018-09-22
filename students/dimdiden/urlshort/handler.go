@@ -1,6 +1,8 @@
-package dimdiden
+package urlshort
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -30,29 +32,33 @@ func MapHandler(pathsToUrls map[string]string, fallback http.Handler) http.Handl
 	}
 }
 
-// YAMLHandler will parse the provided YAML and then return
+// FileMapHandler will parse the provided YAML or JSON and then return
 // an http.HandlerFunc (which also implements http.Handler)
 // that will attempt to map any paths to their corresponding
-// URL. If the path is not provided in the YAML, then the
+// URL. If the path is not provided in the YAML or JSON, then the
 // fallback http.Handler will be called instead.
-func YAMLHandler(yml []byte, fallback http.Handler) (http.HandlerFunc, error) {
-	parsedYaml, err := parseYAML(yml)
+func FileMapHandler(content []byte, fallback http.Handler) (http.HandlerFunc, error) {
+	parsed, err := parse(content)
 	if err != nil {
 		return nil, err
 	}
-	pathMap := buildMap(parsedYaml)
+	pathMap := buildMap(parsed)
 	return MapHandler(pathMap, fallback), nil
 }
 
-// parseYAML will parse the yaml file into []PathMap
-func parseYAML(yml []byte) ([]PathMap, error) {
-	// https://codebeautify.org/yaml-to-json-xml-csv
-	var parsedYaml []PathMap
-	err := yaml.Unmarshal(yml, &parsedYaml)
-	if err != nil {
-		return nil, err
+// parse will try to parse either yaml or json file and
+// return array of PathMap or error
+func parse(content []byte) ([]PathMap, error) {
+	var pathmaps []PathMap
+	var err error
+
+	if err = yaml.Unmarshal(content, &pathmaps); err == nil {
+		return pathmaps, nil
 	}
-	return parsedYaml, nil
+	if err = json.Unmarshal(content, &pathmaps); err == nil {
+		return pathmaps, nil
+	}
+	return nil, errors.New("Could not unmarshal file. Available formats: json or yaml")
 }
 
 // buildMap will convert []PathMap to map[string]string
