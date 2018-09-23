@@ -32,17 +32,12 @@ func main() {
 	var pairProducer urlshort.PairProducer
 	// get content from DB or from files
 	if !*useDB {
-		// Open file
-		f, err := os.Open(*file)
+		// get content from file
+		var err error
+		pairProducer, err = getContent(*file)
 		if err != nil {
 			log.Fatal(err)
 		}
-		defer f.Close()
-		content, err := ioutil.ReadAll(f)
-		if err != nil {
-			log.Fatal(err)
-		}
-		pairProducer = urlshort.Content(content)
 	} else {
 		// Open db
 		db, err := urlshort.OpenBDB("my.db", 0600)
@@ -50,7 +45,7 @@ func main() {
 			log.Fatal(err)
 		}
 		defer db.Close()
-
+		// load test data
 		if err := db.LoadInitData(); err != nil {
 			log.Fatal(err)
 		}
@@ -65,6 +60,20 @@ func main() {
 
 	fmt.Println("Starting the server on :8080")
 	http.ListenAndServe(":8080", mainHandler)
+}
+
+// getContent opens file and returns urlshort.Content
+func getContent(file string) (urlshort.Content, error) {
+	f, err := os.Open(file)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	content, err := ioutil.ReadAll(f)
+	if err != nil {
+		return nil, err
+	}
+	return urlshort.Content(content), nil
 }
 
 func defaultMux() *http.ServeMux {
