@@ -10,22 +10,22 @@ import (
 // and is used to implement PairProducer
 // having access to the database
 // https://stackoverflow.com/questions/28800672/how-to-add-new-methods-to-an-existing-type-in-go
-type BoltDB struct {
+type BDB struct {
 	*bolt.DB
 }
 
 // OpenDB create a BoltDB instance with default options
-func OpenBDB(path string, mode os.FileMode) (*BoltDB, error) {
+func OpenBDB(path string, mode os.FileMode) (*BDB, error) {
 	db, err := bolt.Open(path, mode, nil)
 	if err != nil {
 		return nil, err
 	}
-	return &BoltDB{db}, nil
+	return &BDB{db}, nil
 }
 
 // TODO: Implement logic to get key-vallue pairs
 // and convert to array of Pair values
-func (bdb *BoltDB) Pair() ([]Pair, error) {
+func (bdb *BDB) Pair() ([]Pair, error) {
 	pairs := []Pair{
 		Pair{
 			"/fs", "https://www.facebook.com/",
