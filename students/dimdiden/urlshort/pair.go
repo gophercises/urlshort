@@ -2,7 +2,7 @@ package urlshort
 
 import (
 	"encoding/json"
-	"errors"
+	"fmt"
 
 	yaml "gopkg.in/yaml.v2"
 )
@@ -26,7 +26,6 @@ type Content []byte
 // Pair tries to parse either yaml or json content
 // and converts it to array of Pair structs. If non of the available
 // umarshaling methods succeed, a simple error is returned
-// TODO: return valuable errors
 func (c Content) Pair() ([]Pair, error) {
 	var pairs []Pair
 	var err error
@@ -37,5 +36,5 @@ func (c Content) Pair() ([]Pair, error) {
 	if err = json.Unmarshal(c, &pairs); err == nil {
 		return pairs, nil
 	}
-	return nil, errors.New("Could not unmarshal file. Available formats: json or yaml")
+	return nil, fmt.Errorf("Could not unmarshal file. Available formats: json or yaml: %v", err)
 }
