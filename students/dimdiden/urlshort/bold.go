@@ -1,6 +1,7 @@
 package urlshort
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/boltdb/bolt"
@@ -23,16 +24,39 @@ func OpenBDB(path string, mode os.FileMode) (*BDB, error) {
 	return &BDB{db}, nil
 }
 
-// TODO: Implement logic to get key-vallue pairs
-// and convert to array of Pair values
+// LoadInitData is used just to create the pairs bucket and to insert one record.
+func (bdb *BDB) LoadInitData() error {
+	if err := bdb.Update(func(tx *bolt.Tx) error {
+		// create bucket if it doesn't exist
+		bk, err := tx.CreateBucketIfNotExists([]byte("pairs"))
+		if err != nil {
+			return fmt.Errorf("could not create pairs bucket: %v", err)
+		}
+		// insert one key-value pair
+		if err := bk.Put([]byte("/wi"), []byte("https://ru.wikipedia.org")); err != nil {
+			return fmt.Errorf("could not insert entry: %v", err)
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+// Pair will look for key-value pairs in the "pairs" Bucket
+// and will return an array of the Pair structs
 func (bdb *BDB) Pair() ([]Pair, error) {
-	pairs := []Pair{
-		Pair{
-			"/fs", "https://www.facebook.com/",
-		},
-		Pair{
-			"/na", "https://na33.salesforce.com/console",
-		},
+	var pairs []Pair
+
+	if err := bdb.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("pairs"))
+		b.ForEach(func(k, v []byte) error {
+			pairs = append(pairs, Pair{string(k), string(v)})
+			return nil
+		})
+		return nil
+	}); err != nil {
+		return nil, err
 	}
 	return pairs, nil
 }

@@ -50,6 +50,10 @@ func main() {
 			log.Fatal(err)
 		}
 		defer db.Close()
+
+		if err := db.LoadInitData(); err != nil {
+			log.Fatal(err)
+		}
 		pairProducer = db
 	}
 
