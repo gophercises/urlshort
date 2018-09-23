@@ -17,7 +17,7 @@ const DEFAULTFILE = "map.yaml"
 func main() {
 	// Flag block
 	file := flag.String("f", DEFAULTFILE, "specify the path to json or yaml file")
-	useDB := flag.Bool("d", false, "Enable DB instead of file")
+	useDB := flag.Bool("d", false, "Enable DB usage. Any provided files will be ignored")
 	flag.Parse()
 
 	mux := defaultMux()
