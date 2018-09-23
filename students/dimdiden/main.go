@@ -16,7 +16,8 @@ const DEFAULTFILE = "map.yaml"
 
 func main() {
 	// Flag block
-	file := flag.String("f", DEFAULTFILE, "specify the path to file")
+	file := flag.String("f", DEFAULTFILE, "specify the path to json or yaml file")
+	useDB := flag.Bool("d", false, "Enable DB instead of file")
 	flag.Parse()
 
 	mux := defaultMux()
@@ -27,24 +28,39 @@ func main() {
 	}
 	mapHandler := urlshort.MapHandler(pathsToUrls, mux)
 
-	// Open file
-	f, err := os.Open(*file)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer f.Close()
-	content, err := ioutil.ReadAll(f)
-	if err != nil {
-		log.Fatal(err)
+	// pairProducer will be used in the MainHandler
+	var pairProducer urlshort.PairProducer
+	// get content from DB or from files
+	if !*useDB {
+		// Open file
+		f, err := os.Open(*file)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer f.Close()
+		content, err := ioutil.ReadAll(f)
+		if err != nil {
+			log.Fatal(err)
+		}
+		pairProducer = urlshort.Content(content)
+	} else {
+		// Open db
+		db, err := urlshort.OpenBDB("my.db", 0600)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer db.Close()
+		pairProducer = db
 	}
 
-	fileMapHandler, err := urlshort.FileMapHandler(content, mapHandler)
+	// mainHandler will be used as in ListenAndServe
+	mainHandler, err := urlshort.MainHandler(pairProducer, mapHandler)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	fmt.Println("Starting the server on :8080")
-	http.ListenAndServe(":8080", fileMapHandler)
+	http.ListenAndServe(":8080", mainHandler)
 }
 
 func defaultMux() *http.ServeMux {
