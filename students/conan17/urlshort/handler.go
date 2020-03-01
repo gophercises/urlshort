@@ -2,7 +2,7 @@ package urlshort
 
 import (
 	"encoding/json"
-	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -157,10 +157,11 @@ var closeHandle = make([]func() error, 0)
 
 // Close
 func Close() error {
-	var err error
+	var reslut error
 	for _, f := range closeHandle {
-		err = errors.Unwrap(f())
+		if err := f(); err != nil {
+			reslut = fmt.Errorf(reslut.Error(), err)
+		}
 	}
-
-	return err
+	return reslut
 }
