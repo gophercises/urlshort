@@ -69,7 +69,7 @@ path: /urlshort
 				return
 			}
 			resp := httptest.NewRecorder()
-			got(resp, tt.args.req)
+			got.ServeHTTP(resp, tt.args.req)
 			wantResp := tt.wantResp(tt.args.req)
 			if !reflect.DeepEqual(resp, wantResp) {
 				t.Errorf("YAMLHandler() resp = %v, wantResp %v", resp, wantResp)
@@ -135,7 +135,7 @@ func TestJSONHandler(t *testing.T) {
 				return
 			}
 			resp := httptest.NewRecorder()
-			got(resp, tt.args.req)
+			got.ServeHTTP(resp, tt.args.req)
 			wantResp := tt.wantResp(tt.args.req)
 			if !reflect.DeepEqual(resp, wantResp) {
 				t.Errorf("JSONHandler() resp = %v, wantResp %v", resp, wantResp)
