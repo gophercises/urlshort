@@ -1,0 +1,15 @@
+[
+    {
+        "path":"/urlshort-godoc",
+        "url":"https://godoc.org/github.com/gophercises/urlshort"
+    },
+    {
+        "path":"/yaml-godoc",
+        "url":"https://godoc.org/gopkg.in/yaml.v2"
+    },
+    {
+        "path":"/sovflw",
+        "url":"https://whatis.techtarget.com/definition/stack-overflow"
+    }
+
+]
