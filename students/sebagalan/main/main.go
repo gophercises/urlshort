@@ -3,38 +3,50 @@ package main
 import (
 	"flag"
 	"fmt"
-	"gophercises/urlshort"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
+	"time"
+
+	urlshort "gophercises/urlshort/students/sebagalan"
+
+	"github.com/boltdb/bolt"
 )
 
 func getFromFile() ([]byte, string, error) {
-	yamlFileName := flag.String("yml", "paths.yml", "a yml file with in the format of 'path,url'")
-	jsonFileName := flag.String("json", "paths.json", "a json file with in the format of 'path,url'")
+	nameFileName := flag.String("name", "paths.yml", "file with in the format of 'path,url'")
+	typeFileName := flag.String("type", "yaml", "type format")
 
 	flag.Parse()
 	var file []byte
 	var err error
 	var source string
 
-	if yamlFileName != nil {
-		file, err = ioutil.ReadFile(*yamlFileName)
-		source = "yaml"
+	if nameFileName != nil {
+		file, err = ioutil.ReadFile(*nameFileName)
 		if err != nil {
-			exit(fmt.Sprintf("Failed to open file %s\n", *yamlFileName))
+			exit(fmt.Sprintf("Failed to open file %s\n", *nameFileName))
 		}
 	}
 
-	if jsonFileName != nil {
-		file, err = ioutil.ReadFile(*jsonFileName)
-		source = "json"
-		if err != nil {
-			exit(fmt.Sprintf("Failed to open file %s\n", *jsonFileName))
-		}
-	}
-
+	source = *typeFileName
 	return file, source, err
+}
+
+func startUpDatabase(databaseName string) *bolt.DB {
+
+	db, err := bolt.Open(databaseName, 600, &bolt.Options{Timeout: 1 * time.Second})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return db
+}
+
+func closeDB(db *bolt.DB) {
+	db.Close()
 }
 
 func exit(message string) {
@@ -46,26 +58,35 @@ func main() {
 	mux := defaultMux()
 	var handler http.HandlerFunc
 	var err error
+	var parser func(file []byte) (urlshort.TT, error)
 
-	// Build the MapHandler using the mux as the fallback
-	pathsToUrls := map[string]string{
-		"/urlshort-godoc": "https://godoc.org/github.com/gophercises/urlshort",
-		"/yaml-godoc":     "https://godoc.org/gopkg.in/yaml.v2",
-	}
+	db := startUpDatabase("./urlshort.db")
+	defer closeDB(db)
 
-	// Build the YAMLHandler using the mapHandler as the
-	// fallback
-	mapHandler := urlshort.MapHandler(pathsToUrls, mux)
-
+	mapHandler := urlshort.MapHandler(db, mux)
 	file, sourceType, err := getFromFile()
 
 	if sourceType == "yaml" {
-		handler, err = urlshort.ProxyHandler(file, urlshort.ParseYAML, mapHandler)
+		parser = urlshort.ParseYAML
 	}
 
 	if sourceType == "json" {
-		handler, err = urlshort.ProxyHandler(file, urlshort.ParseJSON, mapHandler)
+		parser = urlshort.ParseJSON
 	}
+
+	parseStreamData, err := func(
+		parser func(file []byte) (urlshort.TT, error),
+		strm []byte) (urlshort.TT, error) {
+
+		parseStreamData, err := parser(strm)
+
+		if err != nil {
+			return nil, err
+		}
+		return parseStreamData, nil
+	}(parser, file)
+
+	handler, err = urlshort.ProxyHandler(db, parseStreamData, mapHandler)
 
 	if err != nil {
 		panic(err)
