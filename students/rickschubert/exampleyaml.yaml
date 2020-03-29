@@ -1,0 +1,4 @@
+- path: /tray
+  url: https://tray.io
+- path: /starwars
+  url: https://starwars.com
