@@ -17,10 +17,14 @@ func lookupRedirectInMapAndActOnIt(mapOfRedirects map[string]string, writer http
 	}
 }
 
-func MapHandler(pathsToUrls map[string]string, fallback http.Handler) http.HandlerFunc {
+func newHandler(urlsMap map[string]string, fallback http.Handler) http.HandlerFunc {
 	return func(writer http.ResponseWriter, req *http.Request) {
-		lookupRedirectInMapAndActOnIt(pathsToUrls, writer, req, fallback)
+		lookupRedirectInMapAndActOnIt(urlsMap, writer, req, fallback)
 	}
+}
+
+func MapHandler(pathsToUrls map[string]string, fallback http.Handler) http.HandlerFunc {
+	return newHandler(pathsToUrls, fallback)
 }
 
 type redirectConfig struct {
@@ -46,8 +50,5 @@ func YAMLHandler(yml []byte, fallback http.Handler) (http.HandlerFunc, error) {
 	var redirects redirectConfigs
 	err := redirects.parseFromYaml(yml)
 	redirectsMap := redirects.convertToMap()
-
-	return func(writer http.ResponseWriter, req *http.Request) {
-		lookupRedirectInMapAndActOnIt(redirectsMap, writer, req, fallback)
-	}, err
+	return newHandler(redirectsMap, fallback), err
 }
