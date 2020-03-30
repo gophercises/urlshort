@@ -22,11 +22,9 @@ func main() {
 	fileLocation := "./exampleyaml.yaml"
 	yamlFile, err := ioutil.ReadFile(fileLocation)
 	exitOnError(err, fmt.Sprintf("Unable to read yaml file at location %s", fileLocation))
-
 	yamlHandler, err := handler.YAMLHandler(yamlFile, mapHandler)
-	if err != nil {
-		panic(err)
-	}
+	exitOnError(err, "Unable to create yaml Handler.")
+
 	fmt.Println("Starting the server on :8080")
 	http.ListenAndServe(":8080", yamlHandler)
 }
