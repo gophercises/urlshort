@@ -6,17 +6,17 @@
 
 ## Exercise details
 
-The goal of this exercise is to create an [http.Handler](https://golang.org/pkg/net/http/#Handler) that will look at the path of any incoming web request and determine if it should redirect the user to a new page, much like URL shortener would.
+El objetivo de este ejercicio es crear un [http.Handler] (https://golang.org/pkg/net/http/#Handler) que examinará la ruta de cualquier solicitud web entrante y determinará si debe redirigir el usuario a una nueva página, como lo haría el acortador de URL.
 
-For instance, if we have a redirect setup for `/dogs` to `https://www.somesite.com/a-story-about-dogs` we would look for any incoming web requests with the path `/dogs` and redirect them.
+Por ejemplo, si tenemos una configuración de redireccionamiento para `/ dogs` a` https: // www.somesite.com / a-story-about-dogs`, buscaríamos cualquier solicitud web entrante con la ruta `/ dogs` y redirigirlos.
 
-To complete this exercises you will need to implement the stubbed out methods in [handler.go](https://github.com/gophercises/urlshort/blob/master/handler.go). There are a good bit of comments explaining what each method should do, and there is also a [main/main.go](https://github.com/gophercises/urlshort/blob/master/main/main.go) source file that uses the package to help you test your code and get an idea of what your program should be doing.
+Para completar estos ejercicios, deberá implementar los métodos apagados en [handler.go] (https://github.com/gophercises/urlshort/blob/master/handler.go). Hay una buena cantidad de comentarios que explican qué debe hacer cada método, y también hay una fuente [main / main.go] (https://github.com/gophercises/urlshort/blob/master/main/main.go) archivo que usa el paquete para ayudarlo a probar su código y tener una idea de lo que su programa debería estar haciendo.
 
-I suggest first commenting out all of the code in main.go related to the `YAMLHandler` function and focusing on implementing the `MapHandler` function first.
+Sugiero comentar primero todo el código en main.go relacionado con la función `YAMLHandler` y centrarme en implementar primero la función` MapHandler`.
 
-Once you have that working, focus on parsing the YAML using the [gopkg.in/yaml.v2](https://godoc.org/gopkg.in/yaml.v2) package. *Note: You will need to `go get` this package if you don't have it already.*
+Una vez que tenga eso funcionando, concéntrese en analizar el YAML utilizando el paquete [gopkg.in/yaml.v2font>(https://godoc.org/gopkg.in/yaml.v2). * Nota: Tendrá que 'obtener' este paquete si aún no lo tiene. *
 
-After you get the YAML parsing down, try to convert the data into a map and then use the MapHandler to finish the YAMLHandler implementation. Eg you might end up with some code like this:
+Después de obtener el análisis YAML, intente convertir los datos en un mapa y luego use MapHandler para finalizar la implementación de YAMLHandler. Por ejemplo, puede terminar con un código como este:
 
 ```go
 func YAMLHandler(yaml []byte, fallback http.Handler) (http.HandlerFunc, error) {
@@ -28,14 +28,13 @@ func YAMLHandler(yaml []byte, fallback http.Handler) (http.HandlerFunc, error) {
   return MapHandler(pathMap, fallback), nil
 }
 ```
-
-But in order for this to work you will need to create functions like `parseYAML` and `buildMap` on your own. This should give you ample experience working with YAML data.
+Pero para que esto funcione, deberá crear funciones como `parseYAML` y` buildMap` por su cuenta. Esto debería darle una amplia experiencia trabajando con datos YAML.
 
 
 ## Bonus
 
 As a bonus exercises you can also...
 
-1. Update the [main/main.go](https://github.com/gophercises/urlshort/blob/master/main/main.go) source file to accept a YAML file as a flag and then load the YAML from a file rather than from a string.
-2. Build a JSONHandler that serves the same purpose, but reads from JSON data.
-3. Build a Handler that doesn't read from a map but instead reads from a database. Whether you use BoltDB, SQL, or something else is entirely up to you.
+1. Actualice el archivo fuente [main / main.go] (https://github.com/gophercises/urlshort/blob/master/main/main.go) para aceptar un archivo YAML como bandera y luego cargue el YAML desde un archivo en lugar de una cadena.
+2. Cree un JSONHandler que tenga el mismo propósito, pero que lea datos de JSON.
+3. Cree un controlador que no lea desde un mapa, sino que lea desde una base de datos. Ya sea que use BoltDB, SQL u otra cosa, depende completamente de usted.
