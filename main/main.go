@@ -24,6 +24,8 @@ func main() {
 
 	mapHandler = urlshort.YAMLHandler(*yamlfile, mapHandler)
 
+	mapHandler = urlshort.JSONHandler("redirect.json", mapHandler)
+
 	fmt.Println("Starting the server on :8080")
 	http.ListenAndServe(":8080", mapHandler)
 }
