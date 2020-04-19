@@ -1,0 +1,4 @@
+- path: "/epa"
+  url: "https://www.google.com"
+- path: "/urlshort-final"
+  url: "https://github.com/gophercises/urlshort/tree/final"

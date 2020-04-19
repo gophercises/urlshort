@@ -1,10 +1,20 @@
 package urlshort
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
+
+	"gopkg.in/yaml.v2"
 )
+
+type PathUrl []struct {
+	Path string `json:"path"`
+	URL  string `json:"url"`
+}
 
 // MapHandler devolverá un http.HandlerFunc (que también
 // implementa http.Handler) que intentará asignar cualquier
@@ -25,11 +35,9 @@ func MapHandler(pathsToUrls map[string]string, fallback http.Handler) http.Handl
 
 		firstPath := "/" + sliceuri[1]
 
-		fmt.Println(firstPath)
-
 		url := pathsToUrls[firstPath]
 
-		if firstPath == url {
+		if url != "" {
 			http.Redirect(w, request, url, 301)
 		}
 
@@ -38,23 +46,77 @@ func MapHandler(pathsToUrls map[string]string, fallback http.Handler) http.Handl
 
 }
 
-// YAMLHandler will parse the provided YAML and then return
-// an http.HandlerFunc (which also implements http.Handler)
-// that will attempt to map any paths to their corresponding
-// URL. If the path is not provided in the YAML, then the
-// fallback http.Handler will be called instead.
-//
-// YAML is expected to be in the format:
-//
-//     - path: /some-path
-//       url: https://www.some-url.com/demo
-//
-// The only errors that can be returned all related to having
-// invalid YAML data.
-//
-// See MapHandler to create a similar http.HandlerFunc via
-// a mapping of paths to urls.
-func YAMLHandler(yml []byte, fallback http.Handler) (http.HandlerFunc, error) {
-	// TODO: Implement this...
-	return nil, nil
+func YAMLHandler(yaml string, fallback http.Handler) http.HandlerFunc {
+
+	binaryYAML := getContentFile(yaml)
+
+	yamlSliceMap := parseYAML(binaryYAML)
+
+	pathsToUrls := buildMap(yamlSliceMap)
+
+	return MapHandler(pathsToUrls, fallback)
+}
+
+func JSONHandler(jsonFile string, fallback http.Handler) http.HandlerFunc {
+
+	binaryJSON := getContentFile(jsonFile)
+
+	var j PathUrl
+
+	err := json.Unmarshal(binaryJSON, &j)
+
+	pathsToUrls := map[string]string{}
+
+	for _, v := range j {
+		pathsToUrls[v.Path] = v.URL
+	}
+
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(2)
+	}
+
+	return MapHandler(pathsToUrls, fallback)
+
+}
+
+func getContentFile(file string) []byte {
+	fileRoute := "../" + file
+
+	content, err := ioutil.ReadFile(fileRoute)
+
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(2)
+	}
+
+	//fmt.Printf("%T %v \n", content, content)
+
+	return content
+}
+
+func parseYAML(b []byte) []map[string]string {
+
+	m := []map[string]string{}
+
+	err := yaml.Unmarshal(b, &m)
+
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(2)
+	}
+
+	return m
+
+}
+
+func buildMap(sm []map[string]string) map[string]string {
+
+	var pathMap = map[string]string{}
+
+	for _, m := range sm {
+		pathMap[m["path"]] = m["url"]
+	}
+
+	return pathMap
 }
