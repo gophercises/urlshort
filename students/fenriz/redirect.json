@@ -1,0 +1,10 @@
+[
+    { 
+     "path" :"/mac",
+     "url": "https://www.mac.com"
+    },
+    { 
+     "path" :"/santander",
+     "url": "https://www.santander.com"
+    }
+]
