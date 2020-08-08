@@ -31,7 +31,7 @@ func MapHandler(
 // PathToURL provides data for a redirect
 type PathToURL struct {
 	Path string `yaml:"path" json:"path"`
-	URL  string `yaml:"url"  json:"path"`
+	URL  string `yaml:"url"  json:"url"`
 }
 
 func pathsToURLsToMap(pathsToURLs []PathToURL) map[string]string {
