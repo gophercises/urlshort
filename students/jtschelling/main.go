@@ -9,7 +9,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/jtschelling/urlshort/students/jtschelling/src/urlshort"
+	"github.com/jtschelling/urlshort/students/jtschelling/pkg"
 	"github.com/tidwall/buntdb"
 )
 
@@ -111,7 +111,7 @@ func hello(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Hello, world!")
 }
 
-func commandLineError(s String) {
+func commandLineError(s string) {
 	fmt.Println(s)
 	os.Exit(1)
 }
