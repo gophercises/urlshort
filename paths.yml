@@ -1,0 +1,4 @@
+- path: /yaml
+  url: https://github.com/go-yaml/yaml
+- path: /yaml-docs
+  url: https://pkg.go.dev/gopkg.in/yaml.v2?tab=doc
