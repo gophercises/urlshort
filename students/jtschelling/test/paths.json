@@ -5,6 +5,6 @@
   },
   {
     "path": "/json-docs",
-    "url": "https://golang.org/pkg/encoding/json/"
+    "url": "https://golang.org/pkg/encoding/json"
   }
 ]
