@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"gopkg.in/yaml.v2"
 	"net/http"
 )
@@ -47,6 +48,14 @@ func YAMLHandler(yml []byte, fallback http.Handler) (http.HandlerFunc, error) {
 	return MapHandler(pathsToUrls, fallback), nil
 }
 
+func JSONHandler(jsn []byte, fallback http.Handler) (http.HandlerFunc, error) {
+	pathsToUrls, err := jsonToMap(jsn)
+	if err != nil {
+		return nil, err
+	}
+	return MapHandler(pathsToUrls, fallback), nil
+}
+
 func yamlToMap(yml []byte) (map[string]string, error) {
 	var records []ShortenerRecord
 	err := yaml.Unmarshal(yml, &records)
@@ -54,14 +63,28 @@ func yamlToMap(yml []byte) (map[string]string, error) {
 		return nil, err
 	}
 
+	return buildMap(records), nil
+}
+
+func jsonToMap(jsn []byte) (map[string]string, error) {
+	var records []ShortenerRecord
+	err := json.Unmarshal(jsn, &records)
+	if err != nil {
+		return nil, err
+	}
+
+	return buildMap(records), nil
+}
+
+func buildMap(records []ShortenerRecord) map[string]string {
 	mappings := make(map[string]string, len(records))
 	for _, record := range records {
 		mappings[record.Path] = record.URL
 	}
-	return mappings, nil
+	return mappings
 }
 
 type ShortenerRecord struct {
-	Path string `yaml:"path"`
-	URL  string `yaml:"url"`
+	Path string `json:"path" yaml:"path"`
+	URL  string `json:"url" yaml:"url"`
 }
