@@ -2,6 +2,8 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/boltdb/bolt"
 	"gopkg.in/yaml.v2"
 	"net/http"
 )
@@ -54,6 +56,31 @@ func JSONHandler(jsn []byte, fallback http.Handler) (http.HandlerFunc, error) {
 		return nil, err
 	}
 	return MapHandler(pathsToUrls, fallback), nil
+}
+
+func BoltHandler(db *bolt.DB, bucketName string, fallback http.Handler) (http.HandlerFunc, error) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var to []byte
+		from := r.URL.Path
+
+		err := db.View(func(tx *bolt.Tx) error {
+			bucket := tx.Bucket([]byte(bucketName))
+			if bucket == nil {
+				return fmt.Errorf("bucket %s not found", bucketName)
+			}
+			to = bucket.Get([]byte(from))
+			return nil
+		})
+		if err != nil {
+			panic(err)
+		}
+
+		if to == nil {
+			fallback.ServeHTTP(w, r)
+			return
+		}
+		http.Redirect(w, r, string(to), http.StatusFound)
+	}, nil
 }
 
 func yamlToMap(yml []byte) (map[string]string, error) {
