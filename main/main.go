@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/gophercises/urlshort"
+	"urlshort"
 )
 
 func main() {
-	mux := defaultMux()
+	mux := defaultmux()
 
 	// Build the MapHandler using the mux as the fallback
 	pathsToUrls := map[string]string{
@@ -33,7 +33,7 @@ func main() {
 	http.ListenAndServe(":8080", yamlHandler)
 }
 
-func defaultMux() *http.ServeMux {
+func defaultmux() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", hello)
 	return mux
