@@ -8,7 +8,7 @@ import (
 func main() {
 
 	mux := defaulServerMux()
-	ans, err := ioutil.ReadFile("C:/Users/afzal.ghani/urlshort/students/AfzalGhani/storage/data.yaml")
+	ans, err := ioutil.ReadFile(storage/data.yaml")
 
 	//fmt.Printf("the value is %v", string(ans))
 
