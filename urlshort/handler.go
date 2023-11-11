@@ -5,6 +5,13 @@ import (
 	"net/http"
 )
 
+type ShortenedUrl struct {
+	Path string `yaml:"path"`
+	Url  string `yaml:"url"`
+}
+
+type ShortenedUrls []ShortenedUrl
+
 // MapHandler will return an http.HandlerFunc (which also
 // implements http.Handler) that will attempt to map any
 // paths (keys in the map) to their corresponding URL (values
@@ -41,7 +48,18 @@ func MapHandler(pathsToUrls map[string]string, fallback http.Handler) http.Handl
 //
 // See MapHandler to create a similar http.HandlerFunc via
 // a mapping of paths to urls.
-func YAMLHandler(yml []byte, fallback http.Handler) (http.HandlerFunc, error) {
-	// TODO: Implement this...
+func YAMLHandler(yamlInput []byte, fallback http.Handler) (http.HandlerFunc, error) {
+	parsedYaml, err := parseYAML(yamlInput)
+	if err != nil {
+		return nil, err
+	}
+	pathMap := buildMap(parsedYaml)
+	return MapHandler(pathMap, fallback), nil
+}
+
+func parseYAML(yamlInput []byte) (ShortenedUrls, error) {
 	return nil, nil
+}
+func buildMap(urls ShortenedUrls) map[string]string {
+	return nil
 }
