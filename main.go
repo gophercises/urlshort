@@ -20,14 +20,17 @@ func main() {
 	}
 	mapHandler := urlshort.MapHandler(pathsToUrls, mux)
 
+	urlMapFile := "assets/urlmap.yaml"
+	yamlFile, err := os.ReadFile(urlMapFile)
+	if err != nil {
+		msg := fmt.Sprintf("Error while reading file '%s': ", urlMapFile)
+		logger.Error(fmt.Sprintf("%s%v", msg, err))
+	}
+
+	yamlInput := string(yamlFile)
+
 	// Build the YAMLHandler using the mapHandler as the fallback
-	yaml := `
-- path: /urlshort
-  url: https://github.com/gophercises/urlshort
-- path: /urlshort-final
-  url: https://github.com/gophercises/urlshort/tree/solution
-`
-	yamlHandler, err := urlshort.YAMLHandler([]byte(yaml), mapHandler)
+	yamlHandler, err := urlshort.YAMLHandler([]byte(yamlInput), mapHandler)
 	if err != nil {
 		panic(err)
 	}
