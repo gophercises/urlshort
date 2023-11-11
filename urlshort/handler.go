@@ -3,6 +3,8 @@ package urlshort
 import (
 	"log/slog"
 	"net/http"
+
+	"gopkg.in/yaml.v3"
 )
 
 type ShortenedUrl struct {
@@ -58,8 +60,20 @@ func YAMLHandler(yamlInput []byte, fallback http.Handler) (http.HandlerFunc, err
 }
 
 func parseYAML(yamlInput []byte) (ShortenedUrls, error) {
-	return nil, nil
+	var urls ShortenedUrls
+	err := yaml.Unmarshal(yamlInput, &urls)
+	if err != nil {
+		slog.Error("Error: " + err.Error())
+		return nil, err
+	}
+
+	return urls, nil
 }
+
 func buildMap(urls ShortenedUrls) map[string]string {
-	return nil
+	pathsToUrls := map[string]string{}
+	for _, url := range urls {
+		pathsToUrls[url.Path] = url.Url
+	}
+	return pathsToUrls
 }

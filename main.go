@@ -2,9 +2,13 @@ package main
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
+	"os"
 	"urlshort/urlshort"
 )
+
+var logger = slog.New(slog.NewTextHandler(os.Stdout, nil))
 
 func main() {
 	mux := defaultMux()
@@ -16,8 +20,7 @@ func main() {
 	}
 	mapHandler := urlshort.MapHandler(pathsToUrls, mux)
 
-	// Build the YAMLHandler using the mapHandler as the
-	// fallback
+	// Build the YAMLHandler using the mapHandler as the fallback
 	yaml := `
 - path: /urlshort
   url: https://github.com/gophercises/urlshort
@@ -28,7 +31,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("Starting the server on :8080")
+	logger.Info("Starting the server on :8080")
 	http.ListenAndServe(":8080", yamlHandler)
 }
 
