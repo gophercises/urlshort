@@ -8,6 +8,8 @@ import (
 	"urlshort/urlshort"
 )
 
+const urlMapYaml = "assets/urlmap.yaml"
+const urlMapJson = "assets/urlmap.json"
 var logger = slog.New(slog.NewTextHandler(os.Stdout, nil))
 
 func main() {
@@ -20,22 +22,35 @@ func main() {
 	}
 	mapHandler := urlshort.MapHandler(pathsToUrls, mux)
 
-	urlMapFile := "assets/urlmap.yaml"
-	yamlFile, err := os.ReadFile(urlMapFile)
+	yamlFile, err := os.ReadFile(urlMapYaml)
 	if err != nil {
-		msg := fmt.Sprintf("Error while reading file '%s': ", urlMapFile)
+		msg := fmt.Sprintf("Error while reading file '%s': ", urlMapYaml)
+		logger.Error(fmt.Sprintf("%s%v", msg, err))
+	}
+
+	jsonFile, err := os.ReadFile(urlMapJson)
+	if err != nil {
+		msg := fmt.Sprintf("Error while reading file '%s': ", urlMapJson)
 		logger.Error(fmt.Sprintf("%s%v", msg, err))
 	}
 
 	yamlInput := string(yamlFile)
+	jsonInput := string(jsonFile)
 
 	// Build the YAMLHandler using the mapHandler as the fallback
 	yamlHandler, err := urlshort.YAMLHandler([]byte(yamlInput), mapHandler)
 	if err != nil {
 		panic(err)
 	}
+
+	// Build the JSONHandler using the YAMLHandler as the fallback
+	jsonHandler, err := urlshort.JSONHandler([]byte(jsonInput), yamlHandler)
+	if err != nil {
+		panic(err)
+	}
+
 	logger.Info("Starting the server on :8080")
-	http.ListenAndServe(":8080", yamlHandler)
+	http.ListenAndServe(":8080", jsonHandler)
 }
 
 func defaultMux() *http.ServeMux {

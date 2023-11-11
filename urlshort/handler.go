@@ -1,6 +1,7 @@
 package urlshort
 
 import (
+	"encoding/json"
 	"log/slog"
 	"net/http"
 
@@ -59,9 +60,31 @@ func YAMLHandler(yamlInput []byte, fallback http.Handler) (http.HandlerFunc, err
 	return MapHandler(pathMap, fallback), nil
 }
 
+func JSONHandler(jsonInput []byte, fallback http.Handler) (http.HandlerFunc, error) {
+	parsedJson, err := parseJSON(jsonInput)
+	if err != nil {
+		return nil, err
+	}
+	pathMap := buildMap(parsedJson)
+	return MapHandler(pathMap, fallback), nil
+}
+
 func parseYAML(yamlInput []byte) (ShortenedUrls, error) {
 	var urls ShortenedUrls
+
 	err := yaml.Unmarshal(yamlInput, &urls)
+	if err != nil {
+		slog.Error("Error: " + err.Error())
+		return nil, err
+	}
+
+	return urls, nil
+}
+
+func parseJSON(jsonInput []byte) (ShortenedUrls, error) {
+	var urls ShortenedUrls
+
+	err := json.Unmarshal(jsonInput, &urls)
 	if err != nil {
 		slog.Error("Error: " + err.Error())
 		return nil, err

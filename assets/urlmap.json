@@ -1,0 +1,14 @@
+[
+  {
+    "path": "/oai",
+    "url": "https://openai.com/"
+  },
+  {
+    "path": "/dcp",
+    "url": "https://datacamp.com"
+  },
+  {
+    "path": "/kgl",
+    "url": "https://kaggle.com"
+  }
+]
