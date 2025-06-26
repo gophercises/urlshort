@@ -1,0 +1,5 @@
+- path: /test
+  url: https://github.com/gophercises/urlshort
+
+- path: /godoc
+  url: https://pkg.go.dev/std

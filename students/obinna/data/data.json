@@ -1,0 +1,10 @@
+[
+  {
+    "path": "/json",
+    "url": "https://developer.mozilla.org"
+  },
+  {
+    "path": "/gh",
+    "url": "https://github.com"
+  }
+]

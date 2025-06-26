@@ -1,0 +1,11 @@
+- path: /urlshort
+  url: https://github.com/gophercises/urlshort
+
+- path: /godoc
+  url: https://pkg.go.dev/std
+
+- path: /yt
+  url: https://www.youtube.com
+
+- path: /gh
+  url: https://github.com
